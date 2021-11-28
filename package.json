@@ -1,0 +1,22 @@
+{
+  "name": "fia-mongo-docs",
+  "version": "1.0.0",
+  "description": "Adds new FIA Documents to a mongo database",
+  "main": "src/index.js",
+  "scripts": {
+    "run": "node src/index.js",
+    "start": "pm2 start src/index.js -n FIA-Fetch",
+    "stop": "pm2 stop src/index.js -n FIA-Fetch"
+  },
+  "author": "Markus Ort",
+  "license": "ISC",
+  "devDependencies": {
+    "prettier": "^2.5.0"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.10",
+    "moment": "^2.29.1",
+    "mongodb": "^4.2.0",
+    "node-fetch": "^2.6.2"
+  }
+}
