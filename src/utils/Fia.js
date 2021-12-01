@@ -13,6 +13,7 @@ class FIA {
   }
 
   async screenshot(url, name) {
+    if (!Config.s3Endpoint) return null;
     if (this.browser === null) {
       this.browser = await Puppeteer.launch({
         args: ["--enable-font-antialiasing", "--font-render-hinting=none"],
@@ -96,21 +97,25 @@ class FIA {
         const res = await Database.documents.findOne({ url: dataDoc.url });
         if (res !== null) continue;
         const screen = await this.screenshot(dataDoc.url, dataDoc.title);
-        await new Promise((resolve) => {
-          this.s3.upload(
-            {
-              Bucket: Config.s3Bucket,
-              Key: "" + dataDoc.date + ".webp",
-              Body: screen,
-              ACL: "public-read",
-              ContentType: "image/webp",
-            },
-            () => {
-              resolve();
-            }
-          );
-        });
-        dataDoc.img = "" + dataDoc.date + ".webp";
+        if (screen !== null) {
+          const upload = await new Promise((resolve) => {
+            this.s3.upload(
+              {
+                Bucket: Config.s3Bucket,
+                Key: "" + dataDoc.date + ".webp",
+                Body: screen,
+                ACL: "public-read",
+                ContentType: "image/webp",
+              },
+              (err, data) => {
+                if (err) resolve(null);
+                if (data) resolve("" + dataDoc.date + ".webp");
+                resolve(null);
+              }
+            );
+          });
+          if (upload !== null) dataDoc.img = "" + dataDoc.date + ".webp";
+        }
         await Database.documents.insertOne(dataDoc);
       }
     }
