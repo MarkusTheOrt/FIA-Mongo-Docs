@@ -100,7 +100,7 @@ class FIA {
       ) {
         const res = await Database.documents.findOne({ url: dataDoc.url });
         if (res !== null) continue;
-        const screen = await this.screenshot(dataDoc.url, dataDoc.title);
+        /*const screen = await this.screenshot(dataDoc.url, dataDoc.title);
         if (screen != null) {
           const upload = await this.s3
             .upload({
@@ -114,8 +114,8 @@ class FIA {
           console.log(upload);
           Log.Info("One Thing");
           if (upload) dataDoc.img = "" + dataDoc.date + ".webp";
-        }
-        await Database.documents.insertOne(dataDoc);
+        }*/
+        //await Database.documents.insertOne(dataDoc);
       }
     }
   }
