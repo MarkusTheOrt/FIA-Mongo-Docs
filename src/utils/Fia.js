@@ -10,6 +10,16 @@ const Config = require("../config.json");
 class FIA {
   constructor() {
     this.browser = null;
+    if (Config.s3Endpoint) {
+      this.s3 = new S3({
+        endpoint: Config.s3Endpoint,
+        credentials: {
+          accessKeyId: Config.s3Access,
+          secretAccessKey: Config.s3Secret,
+        },
+        s3BucketEndpoint: false,
+      });
+    }
   }
 
   async screenshot(url, name) {
@@ -22,14 +32,6 @@ class FIA {
           "--no-sandbox",
         ],
       });
-      this.s3 = new S3({
-        endpoint: Config.s3Endpoint,
-        credentials: {
-          accessKeyId: Config.s3Access,
-          secretAccessKey: Config.s3Secret,
-        },
-        s3BucketEndpoint: false,
-      });
     }
     const page = await this.browser.newPage();
     await page.setViewport({ width: 900, height: 1300, deviceScaleFactor: 2 });
@@ -39,7 +41,7 @@ class FIA {
     );
     await new Promise((resolve) => setTimeout(resolve, 500));
     const screengrab = await page.screenshot({ type: "webp", quality: 65 });
-    await this.browser.close();
+    await page.close();
     return screengrab;
   }
 
@@ -101,7 +103,7 @@ class FIA {
         const res = await Database.documents.findOne({ url: dataDoc.url });
         if (res !== null) continue;
         const screen = await this.screenshot(dataDoc.url, dataDoc.title);
-        /*if (screen != null) {
+        if (screen != null) {
           const upload = await this.s3
             .upload({
               Bucket: Config.s3Bucket,
@@ -111,10 +113,9 @@ class FIA {
               ContentType: "image/webp",
             })
             .promise();
-          console.log(upload);
-          
+
           if (upload) dataDoc.img = "" + dataDoc.date + ".webp";
-        }*/
+        }
         //await Database.documents.insertOne(dataDoc);
         Log.Info("One Thing");
       }
