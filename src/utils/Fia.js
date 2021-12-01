@@ -16,7 +16,11 @@ class FIA {
     if (!Config.s3Endpoint) return null;
     if (this.browser === null) {
       this.browser = await Puppeteer.launch({
-        args: ["--enable-font-antialiasing", "--font-render-hinting=none"],
+        args: [
+          "--enable-font-antialiasing",
+          "--font-render-hinting=none",
+          "--no-sandbox",
+        ],
       });
       this.s3 = new S3({
         endpoint: Config.s3Endpoint,
@@ -33,7 +37,7 @@ class FIA {
       `https://production.pdf.markus-api.workers.dev/?pdf=${url}`,
       { waitUntil: "networkidle0" }
     );
-
+    await new Promise((resolve) => setTimeout(resolve, 500));
     const screengrab = await page.screenshot({ type: "webp", quality: 65 });
     await this.browser.close();
     return screengrab;
@@ -109,7 +113,7 @@ class FIA {
               },
               (err, data) => {
                 if (err) resolve(null);
-                if (data) resolve("" + dataDoc.date + ".webp");
+                if (data) resolve(true);
                 resolve(null);
               }
             );
