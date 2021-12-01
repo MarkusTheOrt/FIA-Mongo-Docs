@@ -116,8 +116,7 @@ class FIA {
 
           if (upload) dataDoc.img = "" + dataDoc.date + ".webp";
         }
-        //await Database.documents.insertOne(dataDoc);
-        Log.Info("One Thing");
+        await Database.documents.insertOne(dataDoc);
       }
     }
   }
