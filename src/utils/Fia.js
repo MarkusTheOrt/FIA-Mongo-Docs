@@ -102,21 +102,16 @@ class FIA {
         if (res !== null) continue;
         const screen = await this.screenshot(dataDoc.url, dataDoc.title);
         if (screen != null) {
-          const upload = await new Promise((resolve) => {
-            this.s3.upload(
-              {
-                Bucket: Config.s3Bucket,
-                Key: "" + dataDoc.date + ".webp",
-                Body: screen,
-                ACL: "public-read",
-                ContentType: "image/webp",
-              },
-              (err, data) => {
-                if (err) resolve(null);
-                resolve(true);
-              }
-            );
-          });
+          const upload = await this.s3
+            .upload({
+              Bucket: Config.s3Bucket,
+              Key: "" + dataDoc.date + ".webp",
+              Body: screen,
+              ACL: "public-read",
+              ContentType: "image/webp",
+            })
+            .promise();
+          console.log(upload);
           Log.Info("One Thing");
           if (upload) dataDoc.img = "" + dataDoc.date + ".webp";
         }
