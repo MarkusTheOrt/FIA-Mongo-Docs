@@ -40,6 +40,7 @@ class FIA {
       { waitUntil: "networkidle0" }
     );
     await page.waitForSelector(".finished");
+    await new Promise((resolve) => setTimeout(resolve, 500));
     const screengrab = await page.screenshot({ type: "webp", quality: 65 });
     await page.close();
     return screengrab;
