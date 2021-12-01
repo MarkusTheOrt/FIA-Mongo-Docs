@@ -39,7 +39,7 @@ class FIA {
       `https://production.pdf.markus-api.workers.dev/?pdf=${url}`,
       { waitUntil: "networkidle0" }
     );
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await page.waitForSelector(".finished");
     const screengrab = await page.screenshot({ type: "webp", quality: 65 });
     await page.close();
     return screengrab;
