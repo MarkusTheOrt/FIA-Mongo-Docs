@@ -3,9 +3,40 @@ const Cheerio = require("cheerio");
 const Moment = require("moment");
 const Database = require("./Database");
 const Log = require("./Log");
+const Puppeteer = require("puppeteer");
+const S3 = require("aws-sdk/clients/s3");
+const Config = require("../config.json");
 
 class FIA {
-  constructor() {}
+  constructor() {
+    this.browser = null;
+  }
+
+  async screenshot(url, name) {
+    if (this.browser === null) {
+      this.browser = await Puppeteer.launch({
+        args: ["--enable-font-antialiasing", "--font-render-hinting=none"],
+      });
+      this.s3 = new S3({
+        endpoint: Config.s3Endpoint,
+        credentials: {
+          accessKeyId: Config.s3Access,
+          secretAccessKey: Config.s3Secret,
+        },
+        s3BucketEndpoint: false,
+      });
+    }
+    const page = await this.browser.newPage();
+    await page.setViewport({ width: 900, height: 1300, deviceScaleFactor: 2 });
+    await page.goto(
+      `https://production.pdf.markus-api.workers.dev/?pdf=${url}`,
+      { waitUntil: "networkidle0" }
+    );
+
+    const screengrab = await page.screenshot({ type: "webp", quality: 65 });
+    await this.browser.close();
+    return screengrab;
+  }
 
   async run() {
     const request = await Fetch("https://www.fia.com/documents/");
@@ -64,7 +95,22 @@ class FIA {
       ) {
         const res = await Database.documents.findOne({ url: dataDoc.url });
         if (res !== null) continue;
-
+        const screen = await this.screenshot(dataDoc.url, dataDoc.title);
+        await new Promise((resolve) => {
+          this.s3.upload(
+            {
+              Bucket: Config.s3Bucket,
+              Key: "" + dataDoc.date + ".webp",
+              Body: screen,
+              ACL: "public-read",
+              ContentType: "image/webp",
+            },
+            () => {
+              resolve();
+            }
+          );
+        });
+        dataDoc.img = "" + dataDoc.date + ".webp";
         await Database.documents.insertOne(dataDoc);
       }
     }
