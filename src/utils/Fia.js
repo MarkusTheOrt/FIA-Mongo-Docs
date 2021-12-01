@@ -112,10 +112,11 @@ class FIA {
             })
             .promise();
           console.log(upload);
-          Log.Info("One Thing");
+          
           if (upload) dataDoc.img = "" + dataDoc.date + ".webp";
         }*/
         //await Database.documents.insertOne(dataDoc);
+        Log.Info("One Thing");
       }
     }
   }
