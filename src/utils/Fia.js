@@ -100,8 +100,8 @@ class FIA {
       ) {
         const res = await Database.documents.findOne({ url: dataDoc.url });
         if (res !== null) continue;
-        /*const screen = await this.screenshot(dataDoc.url, dataDoc.title);
-        if (screen != null) {
+        const screen = await this.screenshot(dataDoc.url, dataDoc.title);
+        /*if (screen != null) {
           const upload = await this.s3
             .upload({
               Bucket: Config.s3Bucket,
