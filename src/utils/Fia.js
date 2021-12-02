@@ -134,7 +134,7 @@ class FIA {
           const upload = await this.s3
             .upload({
               Bucket: Config.s3Bucket,
-              Key: "" + dataDoc.date + ".webp",
+              Key: "" + dataDoc.date + encodeURI(dataDoc.title) + ".webp",
               Body: screen,
               ACL: "public-read",
               ContentType: "image/webp",
