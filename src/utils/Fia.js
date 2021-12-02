@@ -130,20 +130,19 @@ class FIA {
         const res = await Database.documents.findOne({ url: dataDoc.url });
         if (res !== null) continue;
         const screen = await this.screenshot(dataDoc.url, dataDoc.title);
+        const key = Date.now();
         if (screen != null) {
           const upload = await this.s3
             .upload({
               Bucket: Config.s3Bucket,
-              Key: "" + dataDoc.date + encodeURI(dataDoc.title) + ".webp",
+              Key: "" + key + ".webp",
               Body: screen,
               ACL: "public-read",
               ContentType: "image/webp",
             })
             .promise();
 
-          if (upload)
-            dataDoc.img =
-              "" + dataDoc.date + encodeURI(dataDoc.title) + ".webp";
+          if (upload) dataDoc.img = "" + key + ".webp";
         }
         await Database.documents.insertOne(dataDoc);
       }
