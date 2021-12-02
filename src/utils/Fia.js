@@ -24,25 +24,51 @@ class FIA {
 
   async screenshot(url, name) {
     if (!Config.s3Endpoint) return null;
-    if (this.browser === null) {
-      this.browser = await Puppeteer.launch({
-        args: [
-          "--enable-font-antialiasing",
-          "--font-render-hinting=none",
-          "--no-sandbox",
-        ],
-      });
-    }
-    const page = await this.browser.newPage();
-    await page.setViewport({ width: 900, height: 1300, deviceScaleFactor: 2 });
+    const browser = await Puppeteer.launch({
+      args: [
+        "--enable-font-antialiasing",
+        "--font-render-hinting=none",
+        "--no-sandbox",
+        "--desktop",
+        "--disable-setuid-sandbox",
+        "--disable-gpu",
+        "--no-first-run",
+        "--no-zygote",
+        "--disable-infobars",
+        "--disable-canvas-aa",
+        "--disable-gl-drawing-for-tests",
+        "--use-gl=swiftshader",
+        "--disable-breakpad",
+        "--disable-dev-shm-usage",
+        "--user-dta-dir=./chromeData",
+        "--mute-audio",
+        "--enable-webgl",
+        "--disable-2d-canvas-clip-aa",
+        "--disable-web-security",
+      ],
+    });
+    const page = await browser.newPage();
+    await page.setUserAgent(
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36"
+    );
+    await page.setViewport({
+      width: 900,
+      height: 1300,
+      deviceScaleFactor: 1.5,
+    });
     await page.goto(
       `https://production.pdf.markus-api.workers.dev/?pdf=${url}`,
-      { waitUntil: "networkidle0" }
+      { waitUntil: "networkidle2" }
     );
-    await page.waitForSelector(".finished");
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await page.waitForSelector(".finished", { timeout: 10000 }).catch((e) => {
+      console.log("Skipping");
+    });
+
+    //await new Promise((resolve) => setTimeout(resolve, 3000));
     const screengrab = await page.screenshot({ type: "webp", quality: 65 });
     await page.close();
+    await browser.close();
+
     return screengrab;
   }
 
@@ -115,7 +141,9 @@ class FIA {
             })
             .promise();
 
-          if (upload) dataDoc.img = "" + dataDoc.date + ".webp";
+          if (upload)
+            dataDoc.img =
+              "" + dataDoc.date + encodeURI(dataDoc.title) + ".webp";
         }
         await Database.documents.insertOne(dataDoc);
       }
