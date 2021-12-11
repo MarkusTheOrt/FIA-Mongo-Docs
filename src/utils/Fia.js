@@ -146,7 +146,7 @@ class FIA {
           if (upload) dataDoc.img = "" + key + ".webp";
           console.log(dataDoc.img);
         }
-        //await Database.documents.insertOne(dataDoc);
+        await Database.documents.insertOne(dataDoc);
       }
     }
   }
