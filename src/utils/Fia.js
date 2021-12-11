@@ -57,16 +57,14 @@ class FIA {
       deviceScaleFactor: 1.5,
     });
     const pgNum = name in Config.pageConf ? Config.pageConf[name] : 1;
-    console.log(name, pgNum);
     await page.goto(
       `https://production.pdf.markus-api.workers.dev/?pdf=${url}&page=${pgNum}`,
       { waitUntil: "networkidle2" }
     );
     await page.waitForSelector(".finished", { timeout: 10000 }).catch((e) => {
-      console.log("Skipping");
+      Log.Error("Waiting for Screengrab timed out (10s)");
     });
 
-    //await new Promise((resolve) => setTimeout(resolve, 3000));
     const screengrab = await page.screenshot({ type: "webp", quality: 65 });
     await page.close();
     await browser.close();
@@ -144,7 +142,6 @@ class FIA {
             })
             .promise();
           if (upload) dataDoc.img = "" + key + ".webp";
-          console.log(dataDoc.img);
         }
         await Database.documents.insertOne(dataDoc);
       }
