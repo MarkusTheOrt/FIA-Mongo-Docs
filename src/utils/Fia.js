@@ -56,8 +56,10 @@ class FIA {
       height: 1300,
       deviceScaleFactor: 1.5,
     });
+    const pgNum = name in Config.pageConf ? Config.pageConf[name] : 1;
+    console.log(name, pgNum);
     await page.goto(
-      `https://production.pdf.markus-api.workers.dev/?pdf=${url}`,
+      `https://production.pdf.markus-api.workers.dev/?pdf=${url}&page=${pgNum}`,
       { waitUntil: "networkidle2" }
     );
     await page.waitForSelector(".finished", { timeout: 10000 }).catch((e) => {
@@ -141,10 +143,10 @@ class FIA {
               ContentType: "image/webp",
             })
             .promise();
-
           if (upload) dataDoc.img = "" + key + ".webp";
+          console.log(dataDoc.img);
         }
-        await Database.documents.insertOne(dataDoc);
+        //await Database.documents.insertOne(dataDoc);
       }
     }
   }
