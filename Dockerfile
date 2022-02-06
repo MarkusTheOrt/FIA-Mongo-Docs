@@ -4,9 +4,11 @@ ENV MONGO="mongodb://localhost:27017/"
 ENV DB="fia"
 ENV FETCH=60
 
-RUN mkdir /fia-bot
-COPY . /fia-bot
-WORKDIR /fia-bot/
+
+
+RUN mkdir /fia-docs
+COPY . /fia-docs
+WORKDIR /fia-docs/
 
 RUN npm ci --only-production
 
