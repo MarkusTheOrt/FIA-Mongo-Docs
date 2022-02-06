@@ -5,7 +5,7 @@ const Database = require("./Database");
 const Log = require("./Log");
 const Puppeteer = require("puppeteer");
 const S3 = require("aws-sdk/clients/s3");
-const Config = require("../config.json");
+const Config = require("../config.js");
 
 class FIA {
   constructor() {
