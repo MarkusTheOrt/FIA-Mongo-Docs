@@ -1,7 +1,7 @@
 const Log = require("./utils/Log");
 const Database = require("./utils/Database");
 const Fia = require("./utils/Fia");
-const Config = require("./config.json");
+const Config = require("./config.js");
 
 (async () => {
   Database.connect();
