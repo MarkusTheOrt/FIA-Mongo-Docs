@@ -4,7 +4,7 @@ const Fia = require("./utils/Fia");
 const Config = require("./config.js");
 
 (async () => {
-  Database.connect();
+  await Database.connect();
   while (true) {
     await Fia.run();
     await new Promise((resolve) =>
