@@ -1,5 +1,5 @@
 const { MongoClient } = require("mongodb");
-const Config = require("../config.json");
+const Config = require("../config");
 const Log = require("./Log");
 
 class Database {
