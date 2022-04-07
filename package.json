@@ -15,11 +15,10 @@
     "prettier": "^2.5.0"
   },
   "dependencies": {
-    "aws-sdk": "^2.1040.0",
+    "aws-sdk": "^2.1109.0",
     "cheerio": "^1.0.0-rc.10",
-    "moment": "^2.29.1",
-    "mongodb": "^4.2.0",
-    "node-fetch": "^2.6.6",
-    "puppeteer": "^12.0.1"
+    "moment": "^2.29.2",
+    "mongodb": "^4.5.0",
+    "node-fetch": "^2.6.7"
   }
 }

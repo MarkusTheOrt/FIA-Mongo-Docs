@@ -3,13 +3,14 @@ const Cheerio = require("cheerio");
 const Moment = require("moment");
 const Database = require("./Database");
 const Log = require("./Log");
-const Puppeteer = require("puppeteer");
 const S3 = require("aws-sdk/clients/s3");
 const Config = require("../config.js");
+const { execSync, spawnSync } = require("child_process");
+const fs = require("fs");
 
 class FIA {
   constructor() {
-    this.browser = null;
+    // Load the S3 client
     if (Config.s3Endpoint) {
       this.s3 = new S3({
         endpoint: Config.s3Endpoint,
@@ -22,56 +23,54 @@ class FIA {
     }
   }
 
+  /**
+   * Creates a screenshot from the given url
+   * @param {string} url the url of the PDF document
+   * @param {string} name the name of the document
+   * @returns {Buffer} the screenshot
+   */
   async screenshot(url, name) {
     if (!Config.s3Endpoint) return null;
-    const browser = await Puppeteer.launch({
-      args: [
-        "--enable-font-antialiasing",
-        "--font-render-hinting=none",
-        "--no-sandbox",
-        "--desktop",
-        "--disable-setuid-sandbox",
-        "--disable-gpu",
-        "--no-first-run",
-        "--no-zygote",
-        "--disable-infobars",
-        "--disable-canvas-aa",
-        "--disable-gl-drawing-for-tests",
-        "--use-gl=swiftshader",
-        "--disable-breakpad",
-        "--disable-dev-shm-usage",
-        "--user-dta-dir=./chromeData",
-        "--mute-audio",
-        "--enable-webgl",
-        "--disable-2d-canvas-clip-aa",
-        "--disable-web-security",
-      ],
-    });
-    const page = await browser.newPage();
-    await page.setUserAgent(
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36"
-    );
-    await page.setViewport({
-      width: 900,
-      height: 1300,
-      deviceScaleFactor: 1.5,
-    });
-    const pgNum = name in Config.pageConf ? Config.pageConf[name] : 1;
-    await page.goto(
-      `https://production.pdf.markus-api.workers.dev/?pdf=${url}&page=${pgNum}`,
-      { waitUntil: "networkidle2" }
-    );
-    await page.waitForSelector(".finished", { timeout: 10000 }).catch((e) => {
-      Log.Error("Waiting for Screengrab timed out (10s)");
-    });
 
-    const screengrab = await page.screenshot({ type: "webp", quality: 65 });
-    await page.close();
-    await browser.close();
+    const pdf = await Fetch(url);
+    if (pdf.ok !== true) {
+      return null;
+    }
+    fs.writeFileSync("/tmp/fia.pdf", await pdf.buffer());
+
+    if (fs.existsSync("/tmp/fia.pdf") === false) {
+      Log.Warn("Failed to download FIA PDF");
+      return null;
+    }
+
+    const page = Config.pageConf[name] - 1 || 0;
+
+    try {
+      execSync(
+        `convert -density 200 /tmp/fia.pdf[${page}] -quality 90 /tmp/fia.jpg`
+      );
+    } catch (e) {
+      Log.Stack(e);
+    }
+
+    if (fs.existsSync("/tmp/fia.jpg") === false) {
+      Log.Error("Failed to convert pdf to jpg");
+      return null;
+    }
+
+    const screengrab = fs.readFileSync("/tmp/fia.jpg");
+
+    // Clean up
+    fs.rmSync("/tmp/fia.pdf");
+    fs.rmSync("/tmp/fia.jpg");
 
     return screengrab;
   }
 
+  /**
+   * Runs the FIA scraper
+   * @returns {Promise<void>}
+   */
   async run() {
     const request = await Fetch("https://www.fia.com/documents/");
     if (request.ok !== true) {
@@ -96,7 +95,6 @@ class FIA {
     } else {
       event = dbEvent._id.toString();
     }
-    //const events = parsedHtml(".event-title");
     const documents = parsedHtml(`.event-title.active + ul a[href$=pdf]`);
     for (const key in documents) {
       const dataDoc = { event: event, isNew: true };
@@ -135,13 +133,13 @@ class FIA {
           const upload = await this.s3
             .upload({
               Bucket: Config.s3Bucket,
-              Key: "" + key + ".webp",
+              Key: "" + key + ".jpg",
               Body: screen,
               ACL: "public-read",
-              ContentType: "image/webp",
+              ContentType: "image/jpg",
             })
             .promise();
-          if (upload) dataDoc.img = "" + key + ".webp";
+          if (upload) dataDoc.img = "" + key + ".jpg";
         }
         await Database.documents.insertOne(dataDoc);
       }
