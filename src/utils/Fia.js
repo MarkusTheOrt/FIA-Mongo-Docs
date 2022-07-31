@@ -1,6 +1,6 @@
 const Fetch = require("node-fetch");
 const Cheerio = require("cheerio");
-const Moment = require("moment");
+const Moment = require("moment-timezone");
 const Database = require("./Database");
 const Log = require("./Log");
 const S3 = require("aws-sdk/clients/s3");
@@ -112,12 +112,13 @@ class FIA {
         .text()
         .trim();
       dataDoc.date = parseInt(
-        Moment(
+        Moment.tz(
           parsedHtml(document)
             .find(parsedHtml(".date-display-single"))
             .text()
             .trim(),
-          "DD.MM.YY hh:mm"
+          "DD.MM.YY hh:mm",
+          "Europe/France"
         ).format("x")
       );
       if (
