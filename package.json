@@ -18,6 +18,7 @@
     "aws-sdk": "^2.1109.0",
     "cheerio": "^1.0.0-rc.10",
     "moment": "^2.29.2",
+    "moment-timezone": "^0.5.34",
     "mongodb": "^4.5.0",
     "node-fetch": "^2.6.7"
   }
