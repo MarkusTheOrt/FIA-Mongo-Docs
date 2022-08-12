@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import Log from "./Log.js";
+//import Log from "./Log.js";
 import { isNone } from "./Option.js";
 import Try from "./Try.js";
 

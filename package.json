@@ -11,7 +11,7 @@
     "serve": "node build/main.js",
     "start": "nodemon --exec node --loader ts-node/esm/transpile-only src/main.ts",
     "prepare": "husky install",
-    "lint": "eslint ./src"
+    "lint": "eslint --max-warnings=0 ./src"
   },
   "author": "Markus Ort (markus@ort.dev)",
   "license": "ISC",
