@@ -1,3 +1,15 @@
+import fetch from "node-fetch";
+import Log from "./Log.js";
+import { isNone } from "./Option.js";
+import Try from "./Try.js";
+
+const runner = async () => {
+  const body = await Try(fetch("https://www.fia.com/documents"));
+  if (isNone(body)) return;
+};
+
+export default runner;
+
 // const Fetch = require("node-fetch");
 // const Cheerio = require("cheerio");
 // const Moment = require("moment-timezone");

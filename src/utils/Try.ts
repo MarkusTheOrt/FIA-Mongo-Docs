@@ -1,7 +1,9 @@
-export default async <T>(promise: Promise<T>): Promise<T | null> => {
+import { none, Option, some } from "./Option";
+
+export default async <T>(promise: Promise<T>): Promise<Option<T>> => {
   try {
-    return await promise;
+    return some(await promise);
   } catch {
-    return null;
+    return none;
   }
 };
