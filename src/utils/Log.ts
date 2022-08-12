@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as Path from "path";
 import DateFormatter from "./DateFormatter.js";
 
-const logsPath = Path.join(__dirname, "../../Logs");
+const logsPath = Path.join(process.cwd(), "../../Logs");
 
 export type logLevel = " WARN" | "ERROR" | " INFO" | "FATAL";
 
