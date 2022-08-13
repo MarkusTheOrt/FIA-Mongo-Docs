@@ -1,11 +1,13 @@
+import { some, none } from "./utils/Option.js";
+
 export default {
   mongoConnection: process.env.MONGO || "mongodb://127.0.0.1:27017",
   dbName: process.env.DB || "fia",
   fetchInterval: parseInt(process.env.FETCH ?? "60"),
-  s3Access: process.env.S3ACCESS,
-  s3Secret: process.env.S3SECRET,
-  s3Endpoint: process.env.S3ENDPOINT,
-  s3Bucket: process.env.S3BUCKET,
+  s3Access: process.env.S3ACCESS ? some(process.env.S3ACCESS) : none,
+  s3Secret: process.env.S3SECRET ? some(process.env.S3SECRET) : none,
+  s3Endpoint: process.env.S3ENDPOINT ? some(process.env.S3ENDPOINT) : none,
+  s3Bucket: process.env.S3BUCKET ? some(process.env.S3BUCKET) : none,
   pageConf: {
     "Provisional Starting Grid": 2,
     "Final Qualifying Classification": 2,

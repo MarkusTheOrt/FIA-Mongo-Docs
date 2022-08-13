@@ -4,7 +4,7 @@ RUN mkdir /fia-docs
 COPY . /fia-docs
 WORKDIR /fia-docs/
 
-RUN npm install
+RUN npm ci
 RUN npm run build
 
 FROM node:lts-alpine as serve
