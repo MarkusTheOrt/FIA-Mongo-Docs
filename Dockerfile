@@ -19,6 +19,6 @@ COPY --from=build-stage /fia-docs .
 RUN apk add --no-cache imagemagick
 RUN echo "<policymap><policy domain=\"coder\" rights=\"reader | write\" pattern=\"pdf\" /></policymap>" > /etc/ImageMagick-7/policy.xml
 
-RUN npm ci --only-production
+RUN npm ci --only-production --ignore-scripts
 
 CMD npm run serve
