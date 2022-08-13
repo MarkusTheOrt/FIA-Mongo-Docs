@@ -6,7 +6,7 @@ import { none, Option, some, unwrap } from "./Option.js";
 export interface document {
   _id?: ObjectId;
   title: string;
-  url: string;
+  url?: string;
   date: number;
   event?: string;
 }
