@@ -1,18 +1,20 @@
-import { MongoClient, Db, Collection, ObjectId } from "mongodb";
+import { MongoClient, Db, Collection } from "mongodb";
 import Config from "../Config.js";
 import Log from "./Log.js";
 import { none, Option, some, unwrap } from "./Option.js";
 
 export interface document {
-  _id?: ObjectId;
-  title?: string;
+  title: string;
   url: string;
-  date?: number;
-  event?: string;
+  date: number;
+  event: string;
+}
+
+export interface WithImg extends document {
+  img: string;
 }
 
 export interface dbEvent {
-  _id?: ObjectId;
   name: string;
   year: number;
 }

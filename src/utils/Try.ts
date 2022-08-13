@@ -8,7 +8,8 @@ export default async <T>(
     if (data === null || data === undefined)
       return none as Option<Awaited<Exclude<T, null | undefined>>>;
     return some(data) as Option<Awaited<Exclude<T, null | undefined>>>;
-  } catch {
+  } catch (e){
+    console.log(e);
     return none as Option<Exclude<T, null | undefined>>;
   }
 };
