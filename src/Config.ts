@@ -27,5 +27,5 @@ export default {
     "Final Starting Grid": 2,
     "Race Directors Note - Post Race Procedure": 2,
     "Race Directors Note - Pre-Race Procedure": 2,
-  },
+  } as Record<string, number>,
 };
