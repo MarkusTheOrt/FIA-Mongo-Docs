@@ -1,7 +1,7 @@
-module.exports = {
-  mongoConnection: process.env.MONGO,
+export default {
+  mongoConnection: process.env.MONGO || "mongodb://127.0.0.1:27017",
   dbName: process.env.DB || "fia",
-  fetchInterval: process.env.FETCH || 60,
+  fetchInterval: parseInt(process.env.FETCH ?? "60"),
   s3Access: process.env.S3ACCESS,
   s3Secret: process.env.S3SECRET,
   s3Endpoint: process.env.S3ENDPOINT,
