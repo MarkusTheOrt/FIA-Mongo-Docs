@@ -1,11 +1,114 @@
 import fetch from "node-fetch";
 //import Log from "./Log.js";
-import { isNone } from "./Option.js";
+import { Option, isNone, unwrap, none, some } from "./Option.js";
 import Try from "./Try.js";
+import Regexes from "./Regex.js";
+import Database, { dbEvent, document } from "./Database.js";
 
+/**
+ * Scrapes the website, matches documents and inserts new ones.
+ */
 const runner = async () => {
   const body = await Try(fetch("https://www.fia.com/documents"));
   if (isNone(body)) return;
+  const response = unwrap(body);
+  if (!response.ok) return;
+
+  const text = await Try(response.text());
+  if (isNone(text)) return;
+
+  const title = matchTitle(unwrap(text));
+  if (isNone(title)) return;
+
+  const docs = matchDocuments(unwrap(text));
+  if (isNone(docs)) return;
+
+  let event = await findEvent(unwrap(title));
+  if (isNone(event)) {
+    event = await insertEvent(unwrap(title));
+    console.log(
+      "Inserted new Event `%s` for %d",
+      unwrap(title),
+      new Date().getUTCFullYear()
+    );
+  }
+
+  if (isNone(event)) return;
+  console.log(unwrap(event));
+};
+
+/**
+ * Matches the Event title.
+ * @param text the Text to search.
+ * @returns Possible title of Current Grand-Prix Weekend.
+ */
+const matchTitle = (text: string): Option<string> => {
+  const match = text.match(Regexes.active_event);
+  if (match === null) return none;
+  if (match.groups === undefined) return none;
+  if (match.groups.active === undefined) return none;
+  return some(match.groups.active);
+};
+
+/**
+ * Matches The Documents.
+ * @param text The text to search.
+ * @returns Possible list of Documents.
+ */
+const matchDocuments = (text: string): Option<Option<document>[]> => {
+  const match = text.match(Regexes.docuemnts_list);
+  if (match === null) return none;
+  if (match.length === 0) return none;
+
+  const docsMatch = match[0].matchAll(Regexes.documents_block);
+  let next = undefined;
+  const documents = [];
+  do {
+    next = docsMatch.next();
+    if (next.done) continue;
+    if (next.value.length > 0) {
+      documents.push(matchDocument(next.value[0]));
+    }
+  } while (!next.done);
+  if (documents.length === 0) return none;
+  return some(documents);
+};
+
+const matchDocument = (text: string): Option<document> => {
+  const titleMatch = text.match(Regexes.document_title);
+  if (titleMatch === null || titleMatch.groups === undefined) return none;
+
+  const urlMatch = text.match(Regexes.document_url);
+  if (urlMatch === null || urlMatch.groups === undefined) return none;
+
+  const dateMatch = text.match(Regexes.document_date);
+  if (dateMatch === null || dateMatch.groups === undefined) return none;
+
+  return some({
+    title: titleMatch.groups.title,
+    url: `https://www.fia.com${encodeURI(urlMatch.groups.url)}`,
+    date: new Date().getTime(),
+  });
+};
+
+const findEvent = async (
+  name: string,
+  year = new Date().getUTCFullYear()
+): Promise<Option<dbEvent>> => {
+  const event = await Try(Database.Events.findOne({ name: name, year: year }));
+  return event;
+};
+
+const insertEvent = async (
+  name: string,
+  year = new Date().getUTCFullYear()
+): Promise<Option<dbEvent>> => {
+  const event = await Try(
+    Database.Events.insertOne({ name: name, year: year })
+  );
+  if (isNone(event)) return none;
+  if (!unwrap(event).acknowledged) return none;
+  return some({ _id: unwrap(event).insertedId, name: name, year: year });
 };
 
 export default runner;

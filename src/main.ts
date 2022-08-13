@@ -11,4 +11,4 @@ import Config from "./Config.js";
       setTimeout(resolve, Config.fetchInterval * 1000)
     );
   }
-})().catch((e) => Log.Stack(e));
+})().catch((e) => Log.Stack(e.stack));

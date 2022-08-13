@@ -1,14 +1,18 @@
-import { MongoClient, Db, Collection } from "mongodb";
+import { MongoClient, Db, Collection, ObjectId } from "mongodb";
 import Config from "../Config.js";
 import Log from "./Log.js";
 import { none, Option, some, unwrap } from "./Option.js";
 
-interface document {
-  name: string;
+export interface document {
+  _id?: ObjectId;
+  title: string;
   url: string;
+  date: number;
+  event?: string;
 }
 
-interface event {
+export interface dbEvent {
+  _id?: ObjectId;
   name: string;
   year: number;
 }
@@ -18,7 +22,7 @@ export class Database {
   private db: Option<Db> = none;
 
   private documents: Option<Collection<document>> = none;
-  private events: Option<Collection<event>> = none;
+  private events: Option<Collection<dbEvent>> = none;
 
   constructor() {
     this.client = new MongoClient(Config.mongoConnection);
@@ -31,6 +35,14 @@ export class Database {
     const db = unwrap(this.db);
     this.documents = some(db.collection("documents"));
     this.events = some(db.collection("events"));
+  }
+
+  get Documents() {
+    return unwrap(this.documents);
+  }
+
+  get Events() {
+    return unwrap(this.events);
   }
 }
 

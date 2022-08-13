@@ -4,6 +4,6 @@ export default {
   docuemnts_list: /class=\"event-title active\"\>[\s\S]+?(<li>[\s\S]+?<\/ul>)/,
   documents_block: /[<li>[\s\S]+?<\/li>]?/g,
   document_url: /href="(?<url>[\s\S]+?)"/,
-  document_title: /"title">\s+([\s\S]+?)\s+<\/div>/,
-  document_date: /date-display-single">([\d\.\ \:]+)</,
+  document_title: /"title">\s+(?<title>[\s\S]+?)\s+<\/div>/,
+  document_date: /date-display-single">(?<date>[\d\.\ \:]+)</,
 };
