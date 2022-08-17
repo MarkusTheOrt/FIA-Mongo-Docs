@@ -47,7 +47,7 @@ export const S3Upload = async (
   if (isNone(data)) return none;
   if (unwrap(data).$metadata.httpStatusCode !== 200) return none;
 
-  return some(`${unwrap(doc)._id.toString()}.jpg`);
+  return some(`https://fia.ort.dev/${unwrap(doc)._id.toString()}.jpg`);
 };
 
 export default S3Upload;
