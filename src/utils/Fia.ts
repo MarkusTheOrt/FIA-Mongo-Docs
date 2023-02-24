@@ -11,7 +11,7 @@ import upload from "./Upload.js";
  * Scrapes the website, matches documents and inserts new ones.
  */
 const runner = async () => {
-  const body = await Try(fetch("https://www.fia.com/documents"));
+  const body = await Try(fetch("https://www.fia.com/documents/championships/fia-formula-one-world-championship-14/season/season-2023-2042"));
   if (isNone(body)) return;
   const response = unwrap(body);
   if (!response.ok) return;
