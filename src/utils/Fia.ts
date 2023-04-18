@@ -6,6 +6,7 @@ import Database, { dbEvent, document, WithImg } from "./Database.js";
 import { ObjectId, WithId } from "mongodb";
 import screenshot from "./Screenshot.js";
 import upload from "./Upload.js";
+import { stripHtml } from "./Html.js";
 
 /**
  * Scrapes the website, matches documents and inserts new ones.
@@ -115,7 +116,7 @@ const matchDocument = (
   if (dateMatch === null || dateMatch.groups === undefined) return none;
 
   return some({
-    title: titleMatch.groups.title,
+    title: stripHtml(titleMatch.groups.title),
     url: `https://www.fia.com${encodeURI(urlMatch.groups.url)}`,
     date: new Date().getTime(),
     event: unwrap(event)._id.toString(),
